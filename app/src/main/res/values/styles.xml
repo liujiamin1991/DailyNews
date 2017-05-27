@@ -28,4 +28,31 @@
         <item name="overlapAnchor">false</item>  <!--设置不覆盖锚点-->
     </style>
 
+
+    <!--common-->
+    <style name="CommonSytle">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <!--HomeActivity-->
+    <style name="HomeTabLy" parent="CommonSytle">
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_weight">1</item>
+        <item name="android:clickable">true</item>
+        <item name="android:gravity">center</item>
+        <item name="android:orientation">vertical</item>
+    </style>
+
+    <style name="HomeTabIv" parent="@style/CommonSytle">
+        <item name="android:layout_width">@dimen/dimen_dp_10</item>
+        <item name="android:layout_height">@dimen/dimen_dp_10</item>
+    </style>
+
+    <style name="HomeTabTv" parent="@style/CommonSytle">
+        <item name="android:layout_marginTop">@dimen/dimen_dp_2</item>
+        <item name="android:gravity">center</item>
+     <!--   <item name="android:textColor">#decdcd</item> -->
+        <item name="android:textSize">@dimen/dimen_sp_12</item>
+    </style>
 </resources>

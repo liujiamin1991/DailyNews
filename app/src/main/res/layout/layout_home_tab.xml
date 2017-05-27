@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:orientation="horizontal"
+              android:layout_alignParentBottom="true">
+    <LinearLayout
+        android:id="@+id/ly_answer"
+        style="@style/HomeTabLy">
+        <ImageView
+            android:id="@+id/iv_answer"
+            style="@style/HomeTabIv"
+            android:src="@drawable/ic_profile_answer"/>
+        <TextView
+            android:id="@+id/tv_answer"
+            style="@style/HomeTabTv"
+            android:text="日报"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ly_article"
+        style="@style/HomeTabLy">
+        <ImageView
+            android:id="@+id/iv_article"
+            style="@style/HomeTabIv"
+            android:src="@drawable/ic_profile_article"/>
+        <TextView
+            android:id="@+id/tv_article"
+            style="@style/HomeTabTv"
+            android:text="主题"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ly_column"
+        style="@style/HomeTabLy">
+        <ImageView
+            android:id="@+id/iv_column"
+            style="@style/HomeTabIv"
+            android:src="@drawable/ic_profile_column"/>
+        <TextView
+            android:id="@+id/tv_column"
+            style="@style/HomeTabTv"
+            android:text="专栏"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/ly_favorite"
+        style="@style/HomeTabLy">
+        <ImageView
+            android:id="@+id/iv_favorite"
+            style="@style/HomeTabIv"
+            android:src="@drawable/ic_profile_favorite"/>
+        <TextView
+            android:id="@+id/tv_favorite"
+            style="@style/HomeTabTv"
+            android:text="文章"/>
+    </LinearLayout>
+</LinearLayout>
