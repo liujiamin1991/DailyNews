@@ -6,22 +6,22 @@ import com.konka.dailynews.base.BaseFragment;
 /**
  * Created by ljm on 2017-5-27.
  */
-public class AnswerFragment extends BaseFragment
+public class FavoriteFragment extends BaseFragment
 {
-    public AnswerFragment()
+    public FavoriteFragment()
     {
-        super();
+
     }
 
     @Override
     protected int getLayoutId()
     {
-        return R.layout.fragment_answer;
+        return R.layout.fragment_favorite;
     }
 
     @Override
     protected void initView()
     {
-        
+
     }
 }

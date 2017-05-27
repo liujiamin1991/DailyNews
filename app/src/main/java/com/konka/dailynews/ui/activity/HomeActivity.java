@@ -1,5 +1,7 @@
 package com.konka.dailynews.ui.activity;
 
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -12,6 +14,11 @@ import android.widget.TextView;
 
 import com.konka.dailynews.R;
 import com.konka.dailynews.base.BaseActivity;
+import com.konka.dailynews.base.BaseFragment;
+import com.konka.dailynews.ui.fragment.AnswerFragment;
+import com.konka.dailynews.ui.fragment.ArticleFragment;
+import com.konka.dailynews.ui.fragment.ColumnFragment;
+import com.konka.dailynews.ui.fragment.FavoriteFragment;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -69,6 +76,8 @@ public class HomeActivity extends BaseActivity implements OnClickListener
     @Bind(R.id.tv_favorite)
     TextView tvFavorite;
 
+    private List<BaseFragment> ltFmts = new ArrayList<>();
+
     private List<LinearLayout> ltlys = new ArrayList<>();
     private List<ImageView> ltIvs = new ArrayList<>();
     private List<TextView> ltTvs = new ArrayList<>();
@@ -83,6 +92,7 @@ public class HomeActivity extends BaseActivity implements OnClickListener
     @Override
     public void initView(Bundle savedInstanceState)
     {
+        initContent();
         initTab();
     }
 
@@ -91,6 +101,16 @@ public class HomeActivity extends BaseActivity implements OnClickListener
     {
         toolbar.setTitle("头条");
         setSupportActionBar(toolbar);
+    }
+
+    private void initContent()
+    {
+        ltFmts.add(new AnswerFragment());
+        ltFmts.add(new ArticleFragment());
+        ltFmts.add(new ColumnFragment());
+        ltFmts.add(new FavoriteFragment());
+
+        setFragment(ltFmts.get(0));
     }
 
     private void initTab()
@@ -135,6 +155,7 @@ public class HomeActivity extends BaseActivity implements OnClickListener
             case R.id.ly_answer:
                 if(0 != currIndex)
                 {
+                    setFragment(ltFmts.get(0));
                     validateLTab(0);
                     currIndex = 0;
                 }
@@ -142,6 +163,7 @@ public class HomeActivity extends BaseActivity implements OnClickListener
             case R.id.ly_article:
                 if(1 != currIndex)
                 {
+                    setFragment(ltFmts.get(1));
                     validateLTab(1);
                     currIndex = 1;
                 }
@@ -149,6 +171,7 @@ public class HomeActivity extends BaseActivity implements OnClickListener
             case R.id.ly_column:
                 if(2 != currIndex)
                 {
+                    setFragment(ltFmts.get(2));
                     validateLTab(2);
                     currIndex = 2;
                 }
@@ -156,11 +179,20 @@ public class HomeActivity extends BaseActivity implements OnClickListener
             case R.id.ly_favorite:
                 if(3 != currIndex)
                 {
+                    setFragment(ltFmts.get(3));
                     validateLTab(3);
                     currIndex = 3;
                 }
                 break;
         }
+    }
+
+    private void setFragment(BaseFragment fragment)
+    {
+        FragmentManager fm = getFragmentManager();
+        FragmentTransaction trs = fm.beginTransaction();
+        trs.replace(R.id.fl_content,fragment);
+        trs.commit();
     }
 
     private void validateLTab(int index)
