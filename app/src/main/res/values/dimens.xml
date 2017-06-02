@@ -16,10 +16,14 @@
     <dimen name="dimen_dp_10">20dp</dimen>
     <dimen name="dimen_dp_11">12dp</dimen>
     <dimen name="dimen_dp_12">24dp</dimen>
+    <dimen name="dimen_dp_20">40dp</dimen>
 
     <dimen name="dimen_sp_10">10sp</dimen>
     <dimen name="dimen_sp_12">12sp</dimen>
     <dimen name="dimen_sp_14">14sp</dimen>
     <dimen name="dimen_sp_16">16sp</dimen>
     <dimen name="dimen_sp_18">18sp</dimen>
+
+    <!--AnswerFragment-->
+    <dimen name="dimen_viewpager_height">206dp</dimen>
 </resources>

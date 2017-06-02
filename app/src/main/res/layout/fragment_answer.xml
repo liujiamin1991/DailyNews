@@ -2,9 +2,11 @@
 <android.support.v4.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
           android:layout_width="match_parent"
           android:layout_height="match_parent">
+
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <ImageView
             android:id="@+id/iv_progress"
             android:layout_width="wrap_content"
@@ -13,5 +15,41 @@
             android:scaleType="fitCenter"
             android:visibility="invisible"
             android:src="@drawable/icon_progress"/>
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_viewpager_height">
+
+            <android.support.v4.view.ViewPager
+                android:id="@+id/vp_ad"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_viewpager_height"
+                ></android.support.v4.view.ViewPager>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="128dp"
+                android:layout_gravity="top"
+                android:background="@drawable/shadow_gradient"/>
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="84dp"
+                android:layout_gravity="bottom"
+                android:background="@drawable/shadow_gradient_reserve"/>
+
+
+            <com.konka.dailynews.widget.CircleIndicator
+                android:id="@+id/pager_indicator"
+                android:layout_width="wrap_content"
+                android:layout_height="@dimen/dimen_dp_10"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="@dimen/dimen_dp_10"
+                android:visibility="visible"/>
+
+        </FrameLayout>
+
     </FrameLayout>
+
 </android.support.v4.widget.SwipeRefreshLayout>
