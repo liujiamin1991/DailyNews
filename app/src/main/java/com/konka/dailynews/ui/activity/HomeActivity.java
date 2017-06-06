@@ -4,6 +4,7 @@ import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -191,7 +192,12 @@ public class HomeActivity extends BaseActivity implements OnClickListener
     {
         FragmentManager fm = getFragmentManager();
         FragmentTransaction trs = fm.beginTransaction();
-        trs.replace(R.id.fl_content,fragment);
+        if(!fragment.isAdded())
+        {
+            trs.add(R.id.fl_content,fragment);
+        }
+        trs.hide(ltFmts.get(currIndex));
+        trs.show(fragment);
         trs.commit();
     }
 
@@ -211,5 +217,48 @@ public class HomeActivity extends BaseActivity implements OnClickListener
     {
         iv.setColorFilter(getResources().getColor(R.color.tabColorSelector));
         tv.setTextColor(getResources().getColor(R.color.tabColorSelector));
+    }
+
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState)
+    {
+        Log.i("testljm", "activity onCreate");
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
+    protected void onStart()
+    {
+        Log.i("testljm", "activity onStart");
+        super.onStart();
+    }
+
+    @Override
+    protected void onResume()
+    {
+        Log.i("testljm", "activity onResume");
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause()
+    {
+        Log.i("testljm", "activity onPause");
+        super.onPause();
+    }
+
+    @Override
+    protected void onStop()
+    {
+        Log.i("testljm", "activity onStop");
+        super.onStop();
+    }
+
+    @Override
+    protected void onDestroy()
+    {
+        Log.i("testljm", "activity onDestroy");
+        super.onDestroy();
     }
 }
