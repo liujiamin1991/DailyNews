@@ -8,4 +8,8 @@
     <!--HomeActivity-->
     <color name="tabColorNomal">#decdcd</color>
     <color name="tabColorSelector">@color/colorPrimary</color>
+
+    <!--AnswerFragment-->
+    <color name="itembg">#4e4d4d</color>
+    <color name="itemFontNomal">#555555</color>
 </resources>

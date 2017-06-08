@@ -21,7 +21,10 @@
             android:id="@+id/lv_dailys"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scrollbars="none"></ListView>
+            android:visibility="invisible"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:listSelector="@android:color/transparent"></ListView>
         <!--
         <FrameLayout
             android:layout_width="match_parent"

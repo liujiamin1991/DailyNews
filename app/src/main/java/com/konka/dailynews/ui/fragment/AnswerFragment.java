@@ -1,7 +1,10 @@
 package com.konka.dailynews.ui.fragment;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -13,22 +16,35 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AbsListView;
+import android.widget.AdapterView;
 import android.widget.ImageView;
 import android.widget.ListView;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 import com.konka.dailynews.R;
 import com.konka.dailynews.adapter.ADPagerAdapter;
 import com.konka.dailynews.adapter.AnswerDailyAdapter;
 import com.konka.dailynews.base.BaseFragment;
+import com.konka.dailynews.model.DailyBean;
+import com.konka.dailynews.model.DailyListBean;
 import com.konka.dailynews.model.TopDailyBean;
+import com.konka.dailynews.model.TopDailys;
+import com.konka.dailynews.network.HttpResponseListener;
+import com.konka.dailynews.network.NetConstant;
+import com.konka.dailynews.network.OkhttpHelper;
+import com.konka.dailynews.ui.activity.NewsDetails;
 import com.konka.dailynews.widget.CircleIndicator;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import butterknife.Bind;
+import okhttp3.Call;
+import okhttp3.Response;
 
 /**
  * Created by ljm on 2017-5-27.
@@ -44,13 +60,15 @@ public class AnswerFragment extends BaseFragment implements Runnable
     @Bind(R.id.lv_dailys)
     ListView lvDailys;
 
+    public static final String TAG = "AnswerFragment";
+    public static final String LATEST_NEWS_URL = NetConstant.ZHIHU_DAILY_URL + NetConstant.LATEST_NEWS;
+
     ViewPager vpAD;
 
     CircleIndicator pagerIndicator;
 
     private Animation animation;
 
-    private List<String> ltDailys = new ArrayList<>();
     AnswerDailyAdapter dailyAdapter;
 
     private Timer mTimer;
@@ -59,10 +77,52 @@ public class AnswerFragment extends BaseFragment implements Runnable
     private int mPagerPosition = 0;
     private int size;
 
+    private OkhttpHelper okhttpHelper;
+    private String currTime = "";
+    private DailyListBean dailyListBean;
+    private List<TopDailys> ltTopDayiys;
+    private List<DailyBean> ltDaylyBeans = new ArrayList<>();
+
+    Handler handler = new Handler()
+    {
+        @Override
+        public void handleMessage(Message msg)
+        {
+            super.handleMessage(msg);
+            switch (msg.what)
+            {
+                case 0:
+                    hideProgress();
+                    swRefresh.setRefreshing(false);
+                    break;
+
+                case 1:
+                    size = ltTopDayiys.size();
+                    ADPagerAdapter adapter = new ADPagerAdapter(activity, ltTopDayiys);
+                    vpAD.setAdapter(adapter);
+                    pagerIndicator.setViewPager(size, vpAD);
+                    vpAD.setCurrentItem(mPagerPosition);
+
+                    dailyAdapter.setLtDailys(ltDaylyBeans);
+
+                    hideProgress();
+                    swRefresh.setRefreshing(false);
+                    startViewPagerRun();
+
+                    break;
+
+                case 2:
+                    dailyAdapter.setLtDailys(ltDaylyBeans);
+                    break;
+            }
+        }
+    };
+
     public AnswerFragment()
     {
         super();
     }
+
 
     @Override
     protected int getLayoutId()
@@ -73,9 +133,10 @@ public class AnswerFragment extends BaseFragment implements Runnable
     @Override
     protected void initView()
     {
+        okhttpHelper = OkhttpHelper.getInstance();
         initProgressAnim();
         initContentView();
-        initData();
+        getLatestNews();
     }
 
     private void initProgressAnim()
@@ -86,13 +147,25 @@ public class AnswerFragment extends BaseFragment implements Runnable
 
     private void initContentView()
     {
+        showProgress();
+
+        swRefresh.setColorSchemeResources(R.color.colorPrimary);
+        swRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener()
+        {
+            @Override
+            public void onRefresh()
+            {
+                getLatestNews();
+            }
+        });
+
         final View viewHeader = LayoutInflater.from(activity).inflate(R.layout.layout_answerdaily_header,null);
         vpAD = (ViewPager) viewHeader.findViewById(R.id.vp_ad);
         pagerIndicator = (CircleIndicator) viewHeader.findViewById(R.id.pager_indicator);
         lvDailys.addHeaderView(viewHeader);
         initPager();
 
-        dailyAdapter = new AnswerDailyAdapter(activity,ltDailys);
+        dailyAdapter = new AnswerDailyAdapter(activity,ltDaylyBeans);
         lvDailys.setAdapter(dailyAdapter);
         lvDailys.setOnScrollListener(new AbsListView.OnScrollListener()
         {
@@ -105,34 +178,138 @@ public class AnswerFragment extends BaseFragment implements Runnable
             @Override
             public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount)
             {
-                if(viewHeader.getTop() >= 0)
+                if (viewHeader.getTop() >= 0)
                 {
                     swRefresh.setEnabled(true);
-                }
-                else
+                } else
                 {
                     swRefresh.setEnabled(false);
                 }
-                if(firstVisibleItem+visibleItemCount == totalItemCount)
+                if (firstVisibleItem + visibleItemCount == totalItemCount)
                 {
                     View lastVisibleItemView = lvDailys.getChildAt(lvDailys.getChildCount() - 1);
                     if (lastVisibleItemView != null && lastVisibleItemView.getBottom() == lvDailys.getHeight())
                     {
-                        initData();
+                        getBeforeNews(currTime);
                     }
                 }
             }
         });
+
+        lvDailys.setOnItemClickListener(new AdapterView.OnItemClickListener()
+        {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id)
+            {
+                Intent intent = new Intent(activity, NewsDetails.class);
+                activity.startActivity(intent);
+            }
+        });
     }
 
-    private void initData()
+    private void getLatestNews()
     {
-        for(int i=0; i<20; i++)
+        okhttpHelper.setResponseListener(new HttpResponseListener()
         {
-            ltDailys.add("test"+i);
-        }
-        dailyAdapter.setLtDailys(ltDailys);
-        dailyAdapter.notifyDataSetChanged();
+            @Override
+            public void onFailure(Call call, IOException e)
+            {
+                Log.i(TAG, "onFailure");
+                handler.sendEmptyMessage(0);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response, String bodyStr)
+            {
+                Log.i(TAG, "bodyStr:" + bodyStr);
+
+                if (bodyStr == null || bodyStr == "")
+                {
+                    handler.sendEmptyMessageDelayed(0, 2000);
+                    return;
+                }
+
+                Gson gson = new Gson();
+                try
+                {
+                    dailyListBean = gson.fromJson(bodyStr, DailyListBean.class);
+                } catch (JsonSyntaxException ex)
+                {
+                    ex.printStackTrace();
+                }
+
+                if (dailyListBean == null)
+                {
+                    handler.sendEmptyMessageDelayed(0, 2000);
+                    return;
+                }
+
+                ltTopDayiys = dailyListBean.getTop_stories();
+                ltDaylyBeans = dailyListBean.getStories();
+                if (ltTopDayiys == null || ltDaylyBeans == null)
+                {
+                    handler.sendEmptyMessageDelayed(0, 2000);
+                    return;
+                }
+
+                for (DailyBean dailyBean : ltDaylyBeans)
+                {
+                    dailyBean.setDate(dailyListBean.getDate());
+                }
+                currTime = dailyListBean.getDate();
+                handler.sendEmptyMessageDelayed(1, 2000);
+            }
+        });
+        okhttpHelper.httpGet(LATEST_NEWS_URL);
+    }
+
+    private void getBeforeNews(String cuTime)
+    {
+        okhttpHelper.setResponseListener(new HttpResponseListener()
+        {
+            @Override
+            public void onFailure(Call call, IOException e)
+            {
+                Log.i(TAG, "Before News onFailure");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response, String bodyStr)
+            {
+                Log.i(TAG, "Before News bodyStr:" + bodyStr);
+
+                if(bodyStr==null || bodyStr=="")    return;
+
+                Gson gson = new Gson();
+                try
+                {
+                    dailyListBean = gson.fromJson(bodyStr, DailyListBean.class);
+                } catch (JsonSyntaxException ex)
+                {
+                    ex.printStackTrace();
+                }
+
+                if (dailyListBean == null)  return;
+
+                List<DailyBean> bfDailyBeans = dailyListBean.getStories();
+
+                if(bfDailyBeans == null)  return;
+
+                for (DailyBean dailyBean : bfDailyBeans)
+                {
+                    dailyBean.setDate(dailyListBean.getDate());
+                }
+
+                if(ltDaylyBeans == null)
+                    ltDaylyBeans = bfDailyBeans;
+                else
+                    ltDaylyBeans.addAll(bfDailyBeans);
+
+                currTime = dailyListBean.getDate();
+                handler.sendEmptyMessage(2);
+            }
+        });
+        okhttpHelper.httpGet(NetConstant.ZHIHU_DAILY_URL+NetConstant.BEFORE_NEWS+cuTime);
     }
 
     private void initPager()
@@ -143,12 +320,11 @@ public class AnswerFragment extends BaseFragment implements Runnable
             public boolean onTouch(View v, MotionEvent event)
             {
                 int action = event.getAction();
-                if(action==MotionEvent.ACTION_DOWN || action==MotionEvent.ACTION_MOVE)
+                if(action==MotionEvent.ACTION_DOWN || action == MotionEvent.ACTION_MOVE)
                 {
                     mIsUserTouched = true;
                     swRefresh.setEnabled(false);
-                }
-                else if(action == MotionEvent.ACTION_UP)
+                } else if (action == MotionEvent.ACTION_UP)
                 {
                     mIsUserTouched = false;
                     swRefresh.setEnabled(true);
@@ -177,20 +353,6 @@ public class AnswerFragment extends BaseFragment implements Runnable
 
             }
         });
-
-        //test
-        List<TopDailyBean> ltTop = new ArrayList<>();
-        for(int i=0; i<5; i++)
-        {
-            ltTop.add(new TopDailyBean("tst","tst"));
-        }
-        size = ltTop.size();
-        ADPagerAdapter adapter = new ADPagerAdapter(activity,ltTop);
-        vpAD.setAdapter(adapter);
-        pagerIndicator.setViewPager(ltTop.size(), vpAD);
-        vpAD.setCurrentItem(mPagerPosition);
-
-        startViewPagerRun();
     }
 
     private void showProgress()
@@ -198,6 +360,7 @@ public class AnswerFragment extends BaseFragment implements Runnable
         if(animation == null) return;
 
         ivProgress.setVisibility(View.VISIBLE);
+        lvDailys.setVisibility(View.INVISIBLE);
         ivProgress.startAnimation(animation);
     }
 
@@ -205,6 +368,7 @@ public class AnswerFragment extends BaseFragment implements Runnable
     {
         ivProgress.clearAnimation();
         ivProgress.setVisibility(View.INVISIBLE);
+        lvDailys.setVisibility(View.VISIBLE);
     }
 
     public void startViewPagerRun()
